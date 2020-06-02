@@ -8,6 +8,12 @@
   dependencies:
     "@turf/meta" "^3.14.0"
 
+"@turf/bbox@^4.4.0":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/bbox/-/bbox-4.7.3.tgz#e3ad4f10a7e9b41b522880d33083198199059067"
+  dependencies:
+    "@turf/meta" "^4.7.3"
+
 "@turf/center@^3.13.0":
   version "3.14.0"
   resolved "https://registry.yarnpkg.com/@turf/center/-/center-3.14.0.tgz#1083aca4f137d3c4988955740c7d440c45cc9ecc"
@@ -23,6 +29,32 @@
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@turf/helpers/-/helpers-4.3.0.tgz#7b2f733aa0eb3ea1f07d467ac02ede00cc6cde0d"
 
+"@turf/helpers@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/helpers/-/helpers-4.7.3.tgz#bc312ac43cab3c532a483151c4c382c5649429e9"
+
+"@turf/invariant@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/invariant/-/invariant-4.7.3.tgz#538f367d23c113fc849d70c9a524b8563874601d"
+
+"@turf/line-intersect@^4.4.0":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/line-intersect/-/line-intersect-4.7.3.tgz#072b3738637f7a0454aac708f995a3a29764b056"
+  dependencies:
+    "@turf/helpers" "^4.7.3"
+    "@turf/invariant" "^4.7.3"
+    "@turf/line-segment" "^4.7.3"
+    "@turf/meta" "^4.7.3"
+    geojson-rbush "^1.0.1"
+
+"@turf/line-segment@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@turf/line-segment/-/line-segment-4.7.3.tgz#771f71fa653d8e6bbc5a8d892283163e94b34d7a"
+  dependencies:
+    "@turf/helpers" "^4.7.3"
+    "@turf/invariant" "^4.7.3"
+    "@turf/meta" "^4.7.3"
+
 "@turf/meta@^3.13.0", "@turf/meta@^3.14.0":
   version "3.14.0"
   resolved "https://registry.yarnpkg.com/@turf/meta/-/meta-3.14.0.tgz#8d3050c1a0f44bf406a633b6bd28c510f7bcee27"
@@ -30,6 +62,10 @@
 "@turf/meta@^4.3.0":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@turf/meta/-/meta-4.3.0.tgz#eb11dd2c2511524258123767fe0f5c3bd963e8d7"
+
+"@turf/meta@^4.6.0", "@turf/meta@^4.7.3":
+  version "4.7.4"
+  resolved "https://registry.yarnpkg.com/@turf/meta/-/meta-4.7.4.tgz#6de2f1e9890b8f64b669e4b47c09b20893063977"
 
 abbrev@1:
   version "1.1.0"
@@ -971,6 +1007,13 @@ generate-object-property@^1.1.0:
   resolved "https://registry.yarnpkg.com/generate-object-property/-/generate-object-property-1.2.0.tgz#9c0e1c40308ce804f4783618b937fa88f99d50d0"
   dependencies:
     is-property "^1.0.0"
+
+geojson-rbush@^1.0.1:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/geojson-rbush/-/geojson-rbush-1.2.0.tgz#eca3b6a3afb899a453ef82d5e2373092e20d77e5"
+  dependencies:
+    "@turf/meta" "^4.6.0"
+    rbush "^2.0.1"
 
 get-caller-file@^1.0.1:
   version "1.0.2"
@@ -1997,12 +2040,22 @@ queue-async@^1.0.7:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/queue-async/-/queue-async-1.2.1.tgz#0582e01dae253258cf576fc2a35db96fca847f6f"
 
+quickselect@^1.0.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/quickselect/-/quickselect-1.1.1.tgz#852e412ce418f237ad5b660d70cffac647ae94c2"
+
 randomatic@^1.1.3:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/randomatic/-/randomatic-1.1.6.tgz#110dcabff397e9dcff7c0789ccc0a49adf1ec5bb"
   dependencies:
     is-number "^2.0.2"
     kind-of "^3.0.2"
+
+rbush@^2.0.1:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/rbush/-/rbush-2.0.2.tgz#bb6005c2731b7ba1d5a9a035772927d16a614605"
+  dependencies:
+    quickselect "^1.0.1"
 
 rc@^1.1.6, rc@^1.1.7:
   version "1.2.1"
@@ -2612,8 +2665,8 @@ to-fast-properties@^1.0.1:
   resolved "https://registry.yarnpkg.com/to-fast-properties/-/to-fast-properties-1.0.3.tgz#b83571fa4d8c25b82e231b06e3a3055de4ca1a47"
 
 tough-cookie@~2.3.0:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.3.2.tgz#f081f76e4c85720e6c37a5faced737150d84072a"
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.3.4.tgz#ec60cee38ac675063ffc97a5c18970578ee83655"
   dependencies:
     punycode "^1.4.1"
 
