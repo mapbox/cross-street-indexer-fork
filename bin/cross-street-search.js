@@ -2,10 +2,9 @@
 const fs = require('fs');
 const d3 = require('d3-queue');
 const meow = require('meow');
-const levelup = require('level');
 const readline = require('readline');
 const {bbox2tiles} = require('../lib/utils');
-const {searchIndex, searchLevelDB} = require('../');
+const {load, searchIndex, searchIndexDB} = require('../');
 
 const cli = meow(`
   Usage:
@@ -16,6 +15,7 @@ const cli = meow(`
     --bbox      Lookup index files via BBox
     --latlng    Outputs LatLng instead of the default LngLat
     --stream    Enables reading from streaming index file (ignores tiles/bbox options)
+    --dbindex   Read the index database of the named type. Currently suppobrted: leveld
   Examples:
     $ cross-street-search "Chester St" "ABBOT AVE."
     $ cross-street-search "Chester" "ABBOT"
@@ -76,17 +76,14 @@ if (options.stream) {
     });
 
 // Read Cross Street LevelDB index cache
-} else {
+} else if (options.dbindex) {
     // Validation
     let output = options.output || 'cross-street-index';
     if (!fs.existsSync(output)) throw new Error(output + ' folder does not exists');
 
-    // Create LevelDB connection
-    const db = levelup(output);
-
     // No tiles provided
     if (tiles === undefined) {
-        searchLevelDB(name1, name2, db).then(match => {
+        searchIndexDB(options, output, name1, name2).then(match => {
             if (match) {
                 if (options.latlng) match.reverse();
                 process.stdout.write(match + '\n');
@@ -97,7 +94,7 @@ if (options.stream) {
         const q = d3.queue(1);
         for (const tile of tiles) {
             q.defer(callback => {
-                searchLevelDB(name1, name2, db, tile).then(match => {
+                searchIndexDB(options, output, name1, name2, tile).then(match => {
                     if (match) {
                         if (options.latlng) match.reverse();
                         process.stdout.write(match + '\n');
@@ -107,5 +104,24 @@ if (options.stream) {
                 });
             });
         }
+    }
+} else {
+    // Validation
+    let output = options.output || 'cross-street-index';
+    if (!fs.existsSync(output)) throw new Error(output + ' folder does not exists');
+
+    if (!tiles) throw new Error('--tiles or --bbox are required when not searching a stream or index DB');
+
+    const q = d3.queue(1);
+    for (const tile of tiles) {
+        q.defer(callback => {
+            const index = load(tile, output)
+            const match = searchIndex(name1, name2, index);
+            if (match) {
+                if (options.latlng) match.reverse();
+                process.stdout.write(match + '\n');
+                q.abort();
+            }
+        });
     }
 }

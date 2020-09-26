@@ -8,6 +8,8 @@ const tileReduce = require('tile-reduce');
 const {normalize} = require('./lib/normalize');
 const {bbox2tiles} = require('./lib/utils');
 
+
+
 /**
  * Cross Street indexer from OSM QA Tiles
  *
@@ -24,11 +26,9 @@ function indexer(mbtiles, output, options) {
     output = output || 'cross-street-index';
     const debug = options.debug;
 
+
     // Create folder if not exists
     if (!fs.existsSync(output)) mkdirp.sync(output);
-
-    // Create LevelDB connection
-    const db = levelup(output);
 
     // Tile Reduce options
     Object.assign(options, {
@@ -42,30 +42,28 @@ function indexer(mbtiles, output, options) {
     });
     const q = d3.queue(1);
     const ee = tileReduce(options);
+    let db;
 
-    // Execute the following after each tile is completed
+    // Create the index DB if one is requested
+    if (options.dbindex) {
+        const indexPath = path.resolve(__dirname, 'indexes', options.dbindex + '.js');
+        if (!fs.existsSync(indexPath))
+            throw new Error(options.dbindex + ' index does not exist');
+        const DB = require(indexPath);
+        db = new DB(options, output);
+    }
+
     ee.on('reduce', (result, tile) => {
-        const quadkey = tilebelt.tileToQuadkey(tile);
-        const ops = [];
-        Object.keys(result).forEach(hash => {
-            const coord = result[hash].join(',');
-            const hashQuadkey = [quadkey, hash].join('+');
-            ops.push({type: 'put', key: hash, value: coord});
-            ops.push({type: 'put', key: hashQuadkey, value: coord});
-        });
-        q.defer(callback => {
-            db.batch(ops, error => {
-                if (error) throw new Error(error);
-                callback(null);
-            });
-        });
+        if (db) q.defer(db.addTileToIndex.bind(db), tile);
     });
+
     ee.on('end', () => {
         q.awaitAll(error => {
             if (error) throw new Error(error);
-            db.close();
+            if (db) db.close();
         });
     });
+
     return ee;
 }
 
@@ -169,7 +167,15 @@ function searchIndex(name1, name2, index) {
  * const point = searchIndex('Chester St', 'ABBOT AVE.', index);
  * //=[-122.457711, 37.688544]
  */
-function searchLevelDB(name1, name2, leveldb, tile) {
+function searchIndexDB(options, output, name1, name2, tile) {
+    // Open the db index
+    const indexPath = path.resolve(__dirname, 'indexes', options.dbindex + '.js');
+    if (!fs.existsSync(indexPath))
+        throw new Error(options.dbindex + ' index does not exist');
+
+    const DB = require(indexPath);
+    const db = new DB(options, output);
+
     // Normalize input
     const norm1 = normalize(name1);
     const norm2 = normalize(name2);
@@ -179,31 +185,8 @@ function searchLevelDB(name1, name2, leveldb, tile) {
     if (typeof tile === 'string') quadkey = tile;
     else if (Array.isArray(tile)) quadkey = tilebelt.tileToQuadkey(tile);
 
-    // LevelDB Connection
-    let db;
-    if (typeof leveldb === 'string') {
-        let output = leveldb;
-        if (fs.existsSync(path.join(output, 'leveldb'))) output = path.join(output, 'leveldb');
-        db = levelup(output);
-    } else db = leveldb;
 
-    // Get Coordinate from hash (Promise)
-    // Providing tile increases accuracy
-    return new Promise(resolve => {
-        if (quadkey) {
-            const hashQuadkey = [quadkey, norm1, norm2].join('+');
-            db.get(hashQuadkey, (error, value) => {
-                if (error) return resolve(undefined);
-                if (value) return resolve(value.split(','));
-            });
-        } else {
-            const hash = [norm1, norm2].join('+');
-            db.get(hash, (error, value) => {
-                if (error) return resolve(undefined);
-                if (value) return resolve(value.split(','));
-            });
-        }
-    });
+    return db.query(norm1, norm2, quadkey);
 }
 
 module.exports = {
@@ -211,5 +194,5 @@ module.exports = {
     loads,
     indexer,
     searchIndex,
-    searchLevelDB,
+    searchIndexDB,
 };
